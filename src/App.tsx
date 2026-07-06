@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { TentTree } from 'lucide-react';
 import './App.css';
 import { useGearRows } from './lib/useGearRows';
 import { buildCategories, isColdActive } from './lib/gear';
@@ -44,10 +43,7 @@ export default function App() {
   return (
     <div className="app">
       <div className="topbar frow">
-        <h1>
-          <TentTree size={20} strokeWidth={2} aria-hidden />
-          Gear Planner
-        </h1>
+        <h1>Gear Planner</h1>
         <InfoDialog />
       </div>
 
