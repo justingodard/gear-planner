@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"><style>
+body{margin:0;background:#f7f6f4;font-family:'Inter',system-ui,sans-serif;color:#18181b}
+.app{max-width:460px;margin:0 auto;min-height:100vh;background:#f7f6f4;padding-bottom:40px}
+.topbar{position:sticky;top:0;z-index:5;background:#f7f6f4;padding:18px 18px 6px}
+.topbar h1{font-size:20px;font-weight:600;margin:0}
+.infobtn{width:26px;height:26px;border-radius:50%;border:1.5px solid #d4d4d8;background:#fff;color:#71717a;font-size:12px;font-style:italic;font-family:Georgia,serif;cursor:pointer}
+.infocard{margin:0 18px 10px;padding:10px 12px;background:#fff;border:1px solid #e4e4e7;border-radius:10px;font-size:12.5px;line-height:1.5;color:#52525b}
+.card{margin:0 18px 16px;background:#fff;border:1px solid #e4e4e7;border-radius:14px;padding:16px}
+.field{margin-bottom:16px}
+.field:last-of-type{margin-bottom:0}
+.flabel{font-size:12px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.frow{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.tempval{font-size:13px;font-weight:600;color:#b5502e}
+.rangeslider{width:100%;accent-color:#b5502e;margin:4px 0}
+.ticks{display:flex;justify-content:space-between;font-size:10.5px;color:#a1a1aa}
+.lenticks{position:relative;height:13px}
+.lenticks span{position:absolute;top:0}
+.lenticks span:nth-child(1){left:0}
+.lenticks span:nth-child(2){left:50%;transform:translateX(-50%)}
+.lenticks span:nth-child(3){right:0}
+.dualslider{position:relative;height:26px;margin:2px 0 0}
+.dualtrack{position:absolute;left:0;right:0;top:50%;height:4px;background:#e4e4e7;border-radius:2px;transform:translateY(-50%)}
+.dualfill{position:absolute;top:50%;height:4px;background:#b5502e;border-radius:2px;transform:translateY(-50%)}
+.dualslider input[type=range]{position:absolute;left:0;top:0;width:100%;height:26px;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none}
+.dualslider input[type=range]::-webkit-slider-runnable-track{background:transparent;height:26px}
+.dualslider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #b5502e;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer;margin-top:4px}
+.dualslider input[type=range]::-moz-range-track{background:transparent;height:26px}
+.dualslider input[type=range]::-moz-range-thumb{pointer-events:auto;width:18px;height:18px;border-radius:50%;background:#fff;border:2px solid #b5502e;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid #d4d4d8;border-radius:16px;padding:6px 14px;font:500 13px 'Inter',sans-serif;background:#fff;color:#3f3f46;cursor:pointer}
+.chip.on{background:#b5502e;color:#fff;border-color:#b5502e}
+.progressrow{display:flex;align-items:center;gap:10px;padding-top:14px;margin-top:14px;border-top:1px solid #f0f0f1}
+.pbartrack{flex:1;height:6px;background:#f0f0f1;border-radius:3px;overflow:hidden}
+.pbarfill{height:100%;background:#b5502e;border-radius:3px}
+.ptext{font-size:12px;color:#71717a;font-weight:500;white-space:nowrap}
+.categories{padding:0 18px}
+.cat{background:#fff;border:1px solid #e4e4e7;border-radius:14px;margin-bottom:10px;overflow:hidden}
+.cathead{display:flex;align-items:center;justify-content:space-between;width:100%;border:none;background:none;padding:14px 16px;font:600 14.5px 'Inter',sans-serif;color:#18181b;cursor:pointer;text-align:left}
+.cathead .right{display:flex;align-items:center;gap:8px;color:#a1a1aa;font-weight:500;font-size:12.5px}
+.chev{font-size:10px}
+.items{padding:0 16px 8px}
+.item{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;border-top:1px solid #f4f4f5;cursor:pointer}
+.item:first-child{border-top:none}
+.item input{width:17px;height:17px;accent-color:#b5502e;flex:none}
+.item.done span{text-decoration:line-through;color:#b0b0b3}
+.skel{padding:40px 18px;text-align:center;color:#a1a1aa;font-size:13px}
+</style></helmet>
+<div class="app">
+<div class="topbar frow"><h1>Gear Planner</h1><button class="infobtn" onClick="{{toggleInfo}}">i</button></div>
+<sc-if value="{{infoOpen}}"><div class="infocard">Set your trip length and expected weather — the checklist below updates automatically. Check items off as you pack. Data is pulled from a gear CSV (swap in a published Google Sheet later).</div></sc-if>
+<sc-if value="{{loaded}}" hint-placeholder-val="{{false}}">
+<div class="card">
+<div class="field"><div class="flabel">Length</div><input class="rangeslider" type="range" min="1" max="3" step="1" value="{{len}}" onChange="{{setLen}}"><div class="ticks lenticks"><span>Day</span><span>Overnight</span><span>Multi-night</span></div></div>
+<div class="field"><div class="frow"><div class="flabel" style="margin:0">Weather</div><span class="tempval">{{tempLabel}}</span></div>
+<div class="dualslider"><div class="dualtrack"></div><div class="dualfill" style="left:{{fillLeft}};width:{{fillWidth}}"></div>
+<input type="range" min="10" max="40" step="1" value="{{minTemp}}" onChange="{{setMinTemp}}">
+<input type="range" min="10" max="40" step="1" value="{{maxTemp}}" onChange="{{setMaxTemp}}"></div>
+<div class="ticks"><span>10°C</span><span>40°C</span></div></div>
+<div class="field"><div class="flabel">Conditions</div><div class="chiprow">
+<sc-for list="{{conditionChips}}" as="chip" hint-placeholder-count="3"><button class="chip {{chip.cls}}" onClick="{{chip.toggle}}">{{chip.label}}</button></sc-for>
+</div></div>
+<div class="progressrow"><div class="pbartrack"><div class="pbarfill" style="width:{{pct}}%"></div></div><span class="ptext">{{checkedCount}}/{{total}} packed</span></div>
+</div>
+<div class="categories">
+<sc-for list="{{categories}}" as="cat" hint-placeholder-count="4">
+<div class="cat">
+<button class="cathead" onClick="{{cat.toggleExpand}}"><span>{{cat.name}}</span><span class="right">{{cat.checkedCount}}/{{cat.count}}<span class="chev">{{cat.chevSym}}</span></span></button>
+<sc-if value="{{cat.expanded}}" hint-placeholder-val="{{true}}"><div class="items">
+<sc-for list="{{cat.items}}" as="item" hint-placeholder-count="5">
+<label class="{{item.rowClass}}"><input type="checkbox" checked="{{item.checked}}" onChange="{{item.toggle}}"><span>{{item.text}}</span></label>
+</sc-for>
+</div></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{notLoaded}}"><div class="skel">Loading gear list…</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CSV_URL='./gear.csv';
+function parseCSVLine(line){const result=[];let cur='';let inQuotes=false;for(let i=0;i<line.length;i++){const c=line[i];if(inQuotes){if(c==='"'){if(line[i+1]==='"'){cur+='"';i++;}else{inQuotes=false;}}else cur+=c;}else{if(c==='"')inQuotes=true;else if(c===','){result.push(cur);cur='';}else cur+=c;}}result.push(cur);return result;}
+function parseCSV(text){const lines=text.split(/\r?\n/).filter(l=>l.length);const header=parseCSVLine(lines[0]).map(h=>h.trim());return lines.slice(1).map(line=>{const vals=parseCSVLine(line);const obj={};header.forEach((h,i)=>obj[h]=vals[i]!==undefined?vals[i].trim():'');return obj;});}
+class Component extends DCLogic{
+state={loaded:false,rows:[],len:2,minTemp:14,maxTemp:26,conditions:{},checked:{},expanded:{},infoOpen:false};
+componentDidMount(){
+fetch(CSV_URL).then(r=>r.text()).then(text=>{const rows=parseCSV(text);this.setState({rows,loaded:true});}).catch(()=>{this.setState({loaded:true,rows:[]});});
+}
+toggleInfo(){this.setState(s=>({infoOpen:!s.infoOpen}));}
+setLen(e){const v=+e.target.value;this.setState({len:v});}
+setMinTemp(e){const v=+e.target.value;this.setState(s=>({minTemp:Math.min(v,s.maxTemp)}));}
+setMaxTemp(e){const v=+e.target.value;this.setState(s=>({maxTemp:Math.max(v,s.minTemp)}));}
+toggleCondition(key){this.setState(s=>({conditions:{...s.conditions,[key]:!s.conditions[key]}}));}
+toggleItem(key){this.setState(s=>({checked:{...s.checked,[key]:!s.checked[key]}}));}
+toggleExpand(name){this.setState(s=>({expanded:{...s.expanded,[name]:!(s.expanded[name]!==false)}}));}
+renderVals(){
+const st=this.state;
+const CONDITIONS=[{key:'clear',label:'Clear'},{key:'wind',label:'Wind'},{key:'rain',label:'Rain'}];
+const conditionChips=CONDITIONS.map(c=>({label:c.label,cls:st.conditions[c.key]?'on':'',toggle:()=>this.toggleCondition(c.key)}));
+const wet=!!st.conditions.rain;
+const cold=st.minTemp<=7||wet;
+const byCat={};
+st.rows.forEach(r=>{(byCat[r.category]=byCat[r.category]||[]).push(r);});
+const categories=[];
+Object.keys(byCat).forEach(name=>{
+const items=[];
+byCat[name].forEach(r=>{
+let visible=false;
+if(r.tier==='wear'||r.tier==='always')visible=true;
+else if(r.tier==='pack')visible=st.len>=2;
+else if(r.tier==='cold')visible=cold;
+else if(r.tier==='long')visible=st.len>=3;
+if(visible){
+const key=name+'|'+r.item;
+const checked=!!st.checked[key];
+items.push({text:r.item,checked,rowClass:'item'+(checked?' done':''),toggle:()=>this.toggleItem(key)});
+}
+});
+if(items.length){
+const expanded=st.expanded[name]!==false;
+categories.push({name,count:items.length,checkedCount:items.filter(i=>i.checked).length,items,expanded,chevSym:expanded?'▾':'▸',toggleExpand:()=>this.toggleExpand(name)});
+}
+});
+const total=categories.reduce((a,c)=>a+c.count,0);
+const checkedCount=categories.reduce((a,c)=>a+c.checkedCount,0);
+return {
+loaded:st.loaded,notLoaded:!st.loaded,infoOpen:st.infoOpen,toggleInfo:()=>this.toggleInfo(),
+len:st.len,setLen:(e)=>this.setLen(e),
+minTemp:st.minTemp,maxTemp:st.maxTemp,setMinTemp:(e)=>this.setMinTemp(e),setMaxTemp:(e)=>this.setMaxTemp(e),
+tempLabel:st.minTemp+'°C-'+st.maxTemp+'°C',
+fillLeft:((st.minTemp-10)/30*100)+'%',fillWidth:((st.maxTemp-st.minTemp)/30*100)+'%',
+conditionChips,categories,total,checkedCount,
+pct:total?Math.round(checkedCount/total*100):0
+};
+}
+}
+</script>
+</body>
+</html>
